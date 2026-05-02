@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
 
 // ANSI Color Codes for enhanced terminal output
 class Colors {
@@ -37,6 +38,8 @@ class SharedResources {
     public static List<String> executionLog = new ArrayList<>();  // Shared list - NEEDS PROTECTION!
     // ReentrantLock used to protect shared counter variables
     public static final ReentrantLock lock = new ReentrantLock();
+    // ReentrantLock used to protect the executionLog ArrayList
+    public static final ReentrantLock logLock = new ReentrantLock();
     
     // TODO #1: Add a ReentrantLock(s) here to protect critical sections
     // Example: public static final ReentrantLock lock = new ReentrantLock();
@@ -77,9 +80,14 @@ class SharedResources {
     
     // Method to log execution
     public static void logExecution(String message) {
-        // TODO: Protect this critical section with a lock
+        // Protect this critical section with a lock to prevent ConcurrentModificationException
         // RACE CONDITION: ArrayList is not thread-safe!
-        executionLog.add(message);
+        logLock.lock();
+        try {
+            executionLog.add(message);
+        } finally {
+            logLock.unlock();
+        }
     }
 }
 
