@@ -35,6 +35,8 @@ class SharedResources {
     public static int completedProcessCount = 0;   // Shared counter - NEEDS PROTECTION!
     public static long totalWaitingTime = 0;       // Shared accumulator - NEEDS PROTECTION!
     public static List<String> executionLog = new ArrayList<>();  // Shared list - NEEDS PROTECTION!
+    // ReentrantLock used to protect shared counter variables
+    public static final ReentrantLock lock = new ReentrantLock();
     
     // TODO #1: Add a ReentrantLock(s) here to protect critical sections
     // Example: public static final ReentrantLock lock = new ReentrantLock();
@@ -46,19 +48,31 @@ class SharedResources {
     public static void incrementContextSwitch() {
         // TODO: Protect this critical section with a lock
         // RACE CONDITION: Multiple threads might read and write simultaneously!
-        contextSwitchCount++;
+        lock.lock();
+        try {
+            contextSwitchCount++;
+        } finally {
+            lock.unlock();
     }
     
     // Method to increment completed process counter
     public static void incrementCompletedProcess() {
         // TODO: Protect this critical section with a lock
-        completedProcessCount++;
+        lock.lock();
+        try {
+            completedProcessCount++;
+        } finally {
+            lock.unlock();
     }
     
     // Method to add waiting time
     public static void addWaitingTime(long time) {
         // TODO: Protect this critical section with a lock
-        totalWaitingTime += time;
+        lock.lock();
+        try {
+            totalWaitingTime += time;
+        } finally {
+            lock.unlock();
     }
     
     // Method to log execution
